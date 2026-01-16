@@ -66,6 +66,55 @@ router.get("/emergency", async (req, res) => {
   }
 });
 
+// Accept emergency
+router.put("/emergency/:id/accept", async (req, res) => {
+  try {
+    const emergency = await Emergency.findByIdAndUpdate(
+      req.params.id,
+      { status: "accepted" },
+      { new: true }
+    );
+
+    // Emit real-time update
+    req.app.get("io").emit("EmergencyAccepted", emergency);
+
+    res.json({
+      success: true,
+      data: emergency,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+});
+
+//Reject Emergency
+router.put("/emergency/:id/reject", async (req, res) => {
+  try {
+    const emergency = await Emergency.findByIdAndUpdate(
+      req.params.id,
+      { status: "rejected" },
+      { new: true }
+    );
+
+    // Emit real-time update
+    req.app.get("io").emit("EmergencyRejected", emergency);
+
+    res.json({
+      success: true,
+      data: emergency,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+});
+
+
 
 module.exports = router;
 
