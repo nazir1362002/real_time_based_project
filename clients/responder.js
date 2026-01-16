@@ -49,9 +49,15 @@ function showEmergency(emergency) {
       <strong>${emergency.message}</strong>
       <br>Status: <span>${emergency.status}</span>
       ${emergency.status === "pending"
-            ? `<button onclick="acceptEmergency('${emergency._id}')">Accept</button>`
-            :`<button onclick="rejectEmergency('${emergency._id}')">Reject</button>`
+            ? `<button
+            onclick="acceptEmergency('${emergency._id}')">Accept</button>`
+            : ''
         }
+      ${emergency.status === "pending"
+            ? `<button onclick="rejectEmergency('${emergency._id}')">Reject</button>`
+            : ''
+        }
+
         <hr/>
     `;
 
@@ -73,22 +79,23 @@ socket.on("Emergency", (emergency) => {
     showEmergency(emergency);
 });
 
-socket.on("EmergencyAccepted","EmergencyRejected",(emergency) => {
+socket.on("EmergencyAccepted", (emergency) => {
     const li = document.getElementById(emergency._id);
     if (li) {
         li.querySelector("span").innerText = emergency.status;
-        const btn = li.querySelector("button");
+        const btn = li.getElementsByTagName("button");
         if (btn) btn.remove();
     }
 });
-/*socket.on("EmergencyRejected", (emergency) => {
+socket.on("EmergencyRejected", (emergency) => {
     const li = document.getElementById(emergency._id);
     if (li) {
         li.querySelector("span").innerText = emergency.status;
-        const btn = li.querySelector("button");
-        if (btn) btn.remove();
+        const btn = li.getElementsByTagName("button");
+        if(btn) btn.remove();
+
     }
-});*/
+});
 
 
 loadEmergencies();
