@@ -83,19 +83,59 @@ socket.on("EmergencyAccepted", (emergency) => {
     const li = document.getElementById(emergency._id);
     if (li) {
         li.querySelector("span").innerText = emergency.status;
-        const btn = li.getElementsByTagName("button");
-        if (btn) btn.remove();
+        const buttons = li.querySelectorAll("button");
+        buttons.forEach(btn => btn.remove());
     }
 });
 socket.on("EmergencyRejected", (emergency) => {
     const li = document.getElementById(emergency._id);
     if (li) {
         li.querySelector("span").innerText = emergency.status;
-        const btn = li.getElementsByTagName("button");
-        if(btn) btn.remove();
+        const buttons = li.querySelectorAll("button");
+        buttons.forEach(btn => btn.remove());
 
     }
 });
+//For Static Map
+const map = L.map("map").setView([23.8103, 90.4125], 13); // Dhaka
+
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: "© OpenStreetMap",
+}).addTo(map);
+
+let responderMarker = L.marker([23.8103, 90.4125]).addTo(map);
+//For Interacting map marker
+navigator.geolocation.watchPosition(
+    (position) => {
+        const { latitude, longitude } = position.coords;
+
+        // Update marker position
+        responderMarker.setLatLng([latitude, longitude]);
+        map.setView([latitude, longitude]);
+        //Send location to the server
+        socket.emit("responderLocation", {
+            lat: latitude,
+            lng: longitude,
+        });
+
+
+        console.log("My location:", latitude, longitude);
+    },
+    (error) => {
+        console.error("Location error", error);
+    },
+    {
+        enableHighAccuracy: true,
+    }
+);
+
+let otherResponderMarker = L.marker([23.8103, 90.4125]).addTo(map);
+
+socket.on("responderLocation", (location) => {
+  otherResponderMarker.setLatLng([location.lat, location.lng]);
+});
+
+
 
 
 loadEmergencies();
