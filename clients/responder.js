@@ -35,6 +35,7 @@ loadEmergencies();*/
 
 
 const alertList = document.getElementById("alerts");
+
 async function loadEmergencies() {
     const res = await fetch("http://localhost:5000/api/emergency");
     const data = await res.json();
@@ -76,8 +77,22 @@ async function rejectEmergency(id) {
 }
 
 socket.on("Emergency", (emergency) => {
-    showEmergency(emergency);
+  showEmergency(emergency);
+
+  if (emergency.location) {
+    const { lat, lng } = emergency.location;
+
+    if (emergencyMarker) {
+      map.removeLayer(emergencyMarker);
+    }
+
+    emergencyMarker = L.marker([lat, lng], {
+      title: "Emergency Location",
+    }).addTo(map);
+    drawRoute()
+  }
 });
+
 
 socket.on("EmergencyAccepted", (emergency) => {
     const li = document.getElementById(emergency._id);
@@ -99,15 +114,23 @@ socket.on("EmergencyRejected", (emergency) => {
 //For Static Map
 const map = L.map("map").setView([23.8103, 90.4125], 13); // Dhaka
 
+
+
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution: "© OpenStreetMap",
 }).addTo(map);
 
-let responderMarker = L.marker([23.8103, 90.4125]).addTo(map);
+
+let emergencyMarker = null;
+let routeLine = null;
+let responderLatLng = [23.8103, 90.4125];
+let responderMarker = L.marker([23.8103, 90.4125],{title:"Responder Location",}).addTo(map);
+
 //For Interacting map marker
-navigator.geolocation.watchPosition(
+/*navigator.geolocation.watchPosition(
     (position) => {
         const { latitude, longitude } = position.coords;
+        responderLatLng = [latitude, longitude];
 
         // Update marker position
         responderMarker.setLatLng([latitude, longitude]);
@@ -118,7 +141,7 @@ navigator.geolocation.watchPosition(
             lng: longitude,
         });
 
-
+        drawRoute()
         console.log("My location:", latitude, longitude);
     },
     (error) => {
@@ -129,13 +152,34 @@ navigator.geolocation.watchPosition(
     }
 );
 
-let otherResponderMarker = L.marker([23.8103, 90.4125]).addTo(map);
+let otherResponderMarker = L.marker([23.8103, 90.4125],{title:"Responder Location",}).addTo(map);
 
 socket.on("responderLocation", (location) => {
   otherResponderMarker.setLatLng([location.lat, location.lng]);
-});
+});*/
+
+//For draw the routes
+function drawRoute() {
+  console.log("Responder:", responderLatLng);
+  console.log("Emergency marker:", emergencyMarker);
+
+  if (!responderLatLng || !emergencyMarker) return;
+
+  const emergencyLatLng = emergencyMarker.getLatLng();
+
+  if (routeLine) {
+    map.removeLayer(routeLine);
+  }
+
+  routeLine = L.polyline(
+    [responderLatLng, [emergencyLatLng.lat, emergencyLatLng.lng]],
+    { color: "red" }
+  ).addTo(map);
+}
 
 
 
 
 loadEmergencies();
+drawRoute();
+

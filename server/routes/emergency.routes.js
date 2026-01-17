@@ -28,10 +28,10 @@ const Emergency = require("../models/Emergency");
 
 router.post("/emergency", async (req, res) => {
   try {
-    const { message } = req.body;
+    const { message,location } = req.body;
 
     // 1️⃣ Save to MongoDB
-    const emergency = await Emergency.create({ message });
+    const emergency = await Emergency.create({ message, location });
 
     // 2️⃣ Emit real-time event
     const io = req.app.get("io");

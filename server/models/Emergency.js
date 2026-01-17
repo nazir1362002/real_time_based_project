@@ -8,9 +8,14 @@ const emergencySchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["pending", "accepted", "resolved"],
+      enum: ["pending", "accepted", "resolved", "rejected"],
       default: "pending",
     },
+    location: {
+      lat: Number,
+      lng: Number,
+    },
+
   },
   {
     timestamps: true, // adds createdAt & updatedAt
