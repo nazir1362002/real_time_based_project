@@ -10,5 +10,9 @@ app.use(express.json());
 
 const emergencyRoutes = require("./routes/emergency.routes");
 app.use("/api", emergencyRoutes);
+//Connect Routes to app
+const authRoutes = require("./routes/auth");
+app.use("/api/auth", authRoutes);
+
 
 module.exports = app;
