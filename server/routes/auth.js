@@ -3,13 +3,18 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const User = require("../models/User");
+//import User from "../models/User.js";
+//import bcrypt from "bcryptjs";
 
 const router = express.Router();
 
 // Register user
+
 router.post("/register", async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
+    console.log("BODY:", req.body);
+
 
     // Check existing user
     const existingUser = await User.findOne({ email });
@@ -34,7 +39,6 @@ router.post("/register", async (req, res) => {
       user: {
         id: user._id,
         name: user.name,
-        password: user.password,
         email: user.email,
         role: user.role,
       },
