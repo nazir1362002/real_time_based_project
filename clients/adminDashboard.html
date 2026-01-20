@@ -20,7 +20,10 @@
 
     <h3>🗺️ Live Map</h3>
     <div id="map" style="height: 400px; width:400px;"></div>
-    
+
+    <button onclick="logout()">Logout</button>
+
+
 
 
 
@@ -28,6 +31,15 @@
 
 
     <script>
+
+        const token = localStorage.getItem("token");
+        const role = localStorage.getItem("role");
+
+        if (!token || role !== "admin") {
+            window.location.href = "login.html";
+        }
+
+
         const map = L.map("map").setView([23.8103, 90.4125], 7); // Bangladesh
         const redIcon = L.icon({
             iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png",
@@ -95,29 +107,30 @@
             });
         }
         //Export CSV file
-      /*  document.getElementById("exportBtn").addEventListener("click", async () => {
-            // 1️⃣ Fetch emergencies from backend
-            const res = await fetch("http://localhost:5000/api/emergency");
-            const data = await res.json();
-
-            // 2️⃣ Convert to CSV format
-            let csv = "Message,Latitude,Longitude,Date,Status\n";
-
-            data.forEach(e => {
-                csv += `"${e.message}",${e.location.lat},${e.location.lng},${new Date(e.createdAt).toLocaleString()},${e.status || "pending"}\n`;
-            });
-
-            // 3️⃣ Create downloadable file
-            const blob = new Blob([csv], { type: "text/csv" });
-            const url = URL.createObjectURL(blob);
-
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = "emergency_report.csv";
-            a.click();
-
-            // 4️⃣ Clean up
-            URL.revokeObjectURL(url);
+        /* document.getElementById("exportBtn").addEventListener("click", async () => {
+        // 1️⃣ Fetch emergencies from backend
+        const res = await fetch("http://localhost:5000/api/emergency");
+        const data = await res.json();
+    
+        // 2️⃣ Convert to CSV format
+        let csv = "Message,Latitude,Longitude,Date,Status\n";
+    
+        data.forEach(e => {
+        csv += `"${e.message}",${e.location.lat},${e.location.lng},${new Date(e.createdAt).toLocaleString()},${e.status ||
+        "pending"}\n`;
+        });
+    
+        // 3️⃣ Create downloadable file
+        const blob = new Blob([csv], { type: "text/csv" });
+        const url = URL.createObjectURL(blob);
+    
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "emergency_report.csv";
+        a.click();
+    
+        // 4️⃣ Clean up
+        URL.revokeObjectURL(url);
         });*/
 
 
@@ -132,6 +145,14 @@
         socket.on("EmergencyAccepted", (emergency) => {
             loadEmergencies();
         });
+
+        function logout() {
+            localStorage.removeItem("token");
+            localStorage.removeItem("role");
+            window.location.href = "login.html";
+        }
+
+
     </script>
 </body>
 

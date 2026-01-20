@@ -3,6 +3,12 @@ const socket = io("http://localhost:5000");
 socket.on("connect", () => {
     console.log("Connected to server"); // <-- check connection
 });
+const token = localStorage.getItem("token");
+const role = localStorage.getItem("role");
+
+if (!token || role !== "responder") {
+    window.location.href = "login.html";
+}
 
 /*socket.on("Emergency", (data) => {
     console.log("Emergency received on client", data); // <-- debug
@@ -77,20 +83,20 @@ async function rejectEmergency(id) {
 }
 
 socket.on("Emergency", (emergency) => {
-  showEmergency(emergency);
+    showEmergency(emergency);
 
-  if (emergency.location) {
-    const { lat, lng } = emergency.location;
+    if (emergency.location) {
+        const { lat, lng } = emergency.location;
 
-    if (emergencyMarker) {
-      map.removeLayer(emergencyMarker);
+        if (emergencyMarker) {
+            map.removeLayer(emergencyMarker);
+        }
+
+        emergencyMarker = L.marker([lat, lng], {
+            title: "Emergency Location",
+        }).addTo(map);
+        drawRoute()
     }
-
-    emergencyMarker = L.marker([lat, lng], {
-      title: "Emergency Location",
-    }).addTo(map);
-    drawRoute()
-  }
 });
 
 
@@ -124,7 +130,7 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
 let emergencyMarker = null;
 let routeLine = null;
 let responderLatLng = [23.8103, 90.4125];
-let responderMarker = L.marker([23.8103, 90.4125],{title:"Responder Location",}).addTo(map);
+let responderMarker = L.marker([23.8103, 90.4125], { title: "Responder Location", }).addTo(map);
 
 //For Interacting map marker
 /*navigator.geolocation.watchPosition(
@@ -160,21 +166,21 @@ socket.on("responderLocation", (location) => {
 
 //For draw the routes
 function drawRoute() {
-  console.log("Responder:", responderLatLng);
-  console.log("Emergency marker:", emergencyMarker);
+    console.log("Responder:", responderLatLng);
+    console.log("Emergency marker:", emergencyMarker);
 
-  if (!responderLatLng || !emergencyMarker) return;
+    if (!responderLatLng || !emergencyMarker) return;
 
-  const emergencyLatLng = emergencyMarker.getLatLng();
+    const emergencyLatLng = emergencyMarker.getLatLng();
 
-  if (routeLine) {
-    map.removeLayer(routeLine);
-  }
+    if (routeLine) {
+        map.removeLayer(routeLine);
+    }
 
-  routeLine = L.polyline(
-    [responderLatLng, [emergencyLatLng.lat, emergencyLatLng.lng]],
-    { color: "red" }
-  ).addTo(map);
+    routeLine = L.polyline(
+        [responderLatLng, [emergencyLatLng.lat, emergencyLatLng.lng]],
+        { color: "red" }
+    ).addTo(map);
 }
 
 
@@ -182,4 +188,10 @@ function drawRoute() {
 
 loadEmergencies();
 drawRoute();
+
+function logout() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    window.location.href = "login.html";
+}
 
